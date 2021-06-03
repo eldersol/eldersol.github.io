@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <textarea type="text" name="texto" style="margin: 1px; height: 374px; width: 337px;" placeholder="Entrada..." id=entrada></textarea>
+    <button onclick="Analizar()">Analizar</button>
+    <textarea type="text" name="texto" style="margin: 1px; height: 374px; width: 337px;" placeholder="Salida..." id=salida></textarea>
+</body>
+<script>
+    function Analizar() {
+        let entrada = document.getElementById("entrada").value;
+        var parser = gramatica.parse(entrada)        
+        document.getElementById("salida").value = parser;
+    }
+</script>
+<script src="gramatica.js"></script>
+
+</html>
