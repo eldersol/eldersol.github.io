@@ -54,6 +54,7 @@
 ">"					                return 't_mayor_que';
 "is"                                return 't_is';
 
+"::"                                return 't_doble_dos_puntos';
 "||"                                return 't_doble_barra';
 "|"                                 return 't_barra';
 
@@ -166,7 +167,10 @@
 %left 't_coma'
 %left 't_or'
 %left 't_and'
-//%left 't_barra'
+%left 't_doble_barra'
+%left 't_doble_diagonal'
+%left 't_diagonal'
+%left 't_barra'
 %left 't_or'
 %left 't_suma' 't_resta'
 %left 't_multiplicacion' 't_div' 't_idiv' 't_mod'
@@ -193,7 +197,7 @@ XPath EOF
     ;
 
 
-XPath	   :   	Expr	 // {$$ = new Expresion($1, @1.first_line, @1.first_column);}
+XPath	   :   	Expr	  {$$ = new Expresion($1, @1.first_line, @1.first_column);}
 ;
 
 
@@ -205,7 +209,7 @@ EnclosedExpr	   :   	t_llave_izquierda Expr t_llave_derecha	 { $$ = $2; }
 ;
 
 
-Expr	   :   	ExprSingle 	Expr_recursivo    
+Expr	   :  Expr_recursivo 	ExprSingle    
 ;
 
 Expr_recursivo :
@@ -374,9 +378,9 @@ SimpleMapExpr_recursivo :
     ;
 
 PathExpr	   :   	
-    t_diagonal                              //{ $$ = new Nodo($1, @1.first_line, @1.first_column); }    
-    |t_doble_diagonal                       //{ $$ = new Nodo($1, @1.first_line, @1.first_column); }                      
-    |RelativePathExpr_recursivo
+    t_diagonal                           /*X*/ {$$=$1;}   //{ $$ = new Nodo($1, @1.first_line, @1.first_column); }    
+    |t_doble_diagonal                    /*X*/ {$$=$1;}   //{ $$ = new Nodo($1, @1.first_line, @1.first_column); }                      
+    |RelativePathExpr_recursivo          /*X*/ {$$=$1;}
     ;
 
 
@@ -392,7 +396,7 @@ RelativePathExpr :
     |StepExpr                                   { $$ = $1; }
     ;
 
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 StepExpr	   :  
     PostfixExpr 
@@ -449,8 +453,8 @@ NodeTest	   :   	KindTest
 ;
 
 NameTest : 
-    StringLiteral   // { $$ = new AxesPredicado($1, @1.first_line, @1.first_column);}
-    | Wildcard      // { $$ = new AxesPredicado($1, @1.first_line, @1.first_column);}
+    StringLiteral /*X*/ {$$=$1;}  // { $$ = new AxesPredicado($1, @1.first_line, @1.first_column);}
+    | Wildcard    /*X*/ {$$=$1;}  // { $$ = new AxesPredicado($1, @1.first_line, @1.first_column);}
 ;
 
 Wildcard : t_multiplicacion                                  //   { $$ = new Wildcard($1, @1.first_line, @1.first_column); } 
@@ -465,10 +469,10 @@ PostfixExpr	   :   	PrimaryExpr PostfixExpr_recursivo   { $$ = $1 + $2; } //{ $$
 ;
 
 PostfixExpr_recursivo: 
-    PostfixExpr_recursivo 
-    | Predicate        { $1; }
-    | ArgumentList     
-    | Lookup           
+    PostfixExpr_recursivo /*X*/ {$$=$1;}
+    | Predicate        /*X*/ {$$=$1;}
+    | ArgumentList     /*X*/ {$$=$1;}
+    | Lookup           /*X*/ {$$=$1;}
     |
     ;
 
@@ -508,16 +512,16 @@ Predicate	   :
 Lookup	   :   	t_interrogacion KeySpecifier	                                                 
 ;
 
-KeySpecifier	   :   NCName
-    | IntegerLiteral 
-    | ParenthesizedExpr 
-    | t_multiplicacion	
+KeySpecifier	   :   NCName       /*X*/ {$$=$1;}
+    | IntegerLiteral                /*X*/ {$$=$1;}
+    | ParenthesizedExpr             /*X*/ {$$=$1;}
+    | t_multiplicacion	            /*X*/ {$$=$1;}
 ;
 
-ArrowFunctionSpecifier	   :   	
-    StringLiteral
-    |ParenthesizedExpr
-    |VarRef	                                                                 
+ArrowFunctionSpecifier	   :   	    
+    StringLiteral                   /*X*/ {$$=$1;}
+    |ParenthesizedExpr              /*X*/ {$$=$1;}
+    |VarRef	                        /*X*/ {$$=$1;}                           
 ;
 
 PrimaryExpr	   :   	Literal { $$ = $1; }
@@ -530,35 +534,39 @@ PrimaryExpr	   :   	Literal { $$ = $1; }
 | UnaryLookup	    { $$ = $1; }
 ;
 
-Literal	   :   	NumericLiteral  
-	| StringLiteral				 
+Literal	   :   	NumericLiteral      /*X*/ {$$=$1;}
+	| StringLiteral				    /*X*/ {$$=$1;}
 ;
 
 
-NumericLiteral	   :   	IntegerLiteral | DecimalLiteral
+NumericLiteral	   :   	IntegerLiteral          /*X*/ {$$=$1;}
+    | DecimalLiteral        /*X*/ {$$=$1;}
 ;
 
 VarRef : t_dolar VarName       { $$ = $1 + $2 ; }
 ;
 
-VarName : StringLiteral
+VarName : StringLiteral        /*X*/ {$$=$1;}
 ;
 
 ParenthesizedExpr	   :   	t_parentesis_izquierdo Expr t_parentesis_derecho    { $$ = $1 + $2 + $3 ; }
     |	t_parentesis_izquierdo t_parentesis_derecho                             { $$ = $1 + $2 ; }
 ;
 
-ContextItemExpr	   :   	t_punto	   // {$$ = new Nodo($1, @1.first_line, @1.first_column);}
+ContextItemExpr	   :   	t_punto	        /*X*/ {$$=$1;}   // {$$ = new Nodo($1, @1.first_line, @1.first_column);}
 ;
 
-Argument	   :   	ExprSingle | ArgumentPlaceholder	
+Argument	   :   	
+    ExprSingle              /*X*/ {$$=$1;}
+    | ArgumentPlaceholder	/*X*/ {$$=$1;}
 ;
 
-ArgumentPlaceholder	   :   	t_interrogacion	
+ArgumentPlaceholder	   :   	t_interrogacion	        /*X*/ {$$=$1;}
 ;
 
-FunctionItemExpr	   :   	 InlineFunctionExpr	
+FunctionItemExpr	   :   	 InlineFunctionExpr	    /*X*/ {$$=$1;}
 ;
+
 InlineFunctionExpr	   :   	
     t_function t_parentesis_izquierdo  t_parentesis_derecho t_as SequenceType FunctionBody   
     |t_function t_parentesis_izquierdo t_parentesis_derecho FunctionBody              
@@ -569,8 +577,8 @@ MapConstructor	   :   	t_map t_llave_izquierda MapConstructorEntry MapConstructo
 ;
 
 MapConstructor_recursivo :
-    MapConstructor_recursivo 
-    |t_coma MapConstructorEntry
+    MapConstructor_recursivo    /*X*/ {$$=$1;}
+    |t_coma MapConstructorEntry /*X*/ {$$=$1;}
     |
     ;
 
@@ -578,8 +586,8 @@ MapConstructor_recursivo :
 MapConstructorEntry	   :   	ExprSingle t_dos_puntos ExprSingle	
 ;
 
-ArrayConstructor	   :   	SquareArrayConstructor 
-    | CurlyArrayConstructor	
+ArrayConstructor	   :   	SquareArrayConstructor  /*X*/ {$$=$1;}
+    | CurlyArrayConstructor	                        /*X*/ {$$=$1;}
 ;
 
 SquareArrayConstructor	   :   	t_corchete_izquierdo ExprSingle SquareArrayConstructor_recursivo t_corchete_derecho
@@ -610,14 +618,14 @@ ItemType	   :   	KindTest { $$ = $1; }
 ;
 
 
-KindTest	   :   	DocumentTest
-| ElementTest
-| AttributeTest
-| PITest
-| CommentTest
-| TextTest         
-| NamespaceNodeTest                   
-| AnyKindTest	
+KindTest	   :   	DocumentTest        /*X*/ {$$=$1;}
+| ElementTest                           /*X*/ {$$=$1;}
+| AttributeTest                         /*X*/ {$$=$1;}
+| PITest                                /*X*/ {$$=$1;}
+| CommentTest                           /*X*/ {$$=$1;}
+| TextTest                              /*X*/ {$$=$1;}
+| NamespaceNodeTest                     /*X*/ {$$=$1;}
+| AnyKindTest	                        /*X*/ {$$=$1;}
 ;
 
 AnyKindTest	   :   	t_node t_parentesis_izquierdo t_parentesis_derecho	    { $$ = $1 + $2 + $3 ; }
@@ -648,7 +656,7 @@ AttributeTest	   :
     |t_attribute t_parentesis_izquierdo t_parentesis_derecho                                { $$ = $1 + $2 + $3 ; }
 ;
 
-AttribNameOrWildcard	   :   	t_multiplicacion	
+AttribNameOrWildcard	   :   	t_multiplicacion	    /*X*/ {$$=$1;}
 ;
 
 
@@ -658,8 +666,8 @@ ElementTest	   :
 ;
 
 
-FunctionTest	   :   	AnyFunctionTest
-| TypedFunctionTest	
+FunctionTest	   :   	AnyFunctionTest         /*X*/ {$$=$1;}
+| TypedFunctionTest	                            /*X*/ {$$=$1;}
 ;
 
 AnyFunctionTest	   :   	t_function t_parentesis_izquierdo t_multiplicacion t_parentesis_derecho	 { $$ = $1 + $2 + $3 + $4; }
@@ -669,9 +677,9 @@ TypedFunctionTest	   :   	t_function t_parentesis_izquierdo SequenceType TypedFu
     |t_function t_parentesis_izquierdo t_parentesis_derecho t_as SequenceType	
 ;
 
-TypedFunctionTest_recursivo :
-    TypedFunctionTest_recursivo 
-    |t_coma SequenceType
+TypedFunctionTest_recursivo :   
+    TypedFunctionTest_recursivo     /*X*/ {$$=$1;}
+    |t_coma SequenceType    /*X*/ {$$=$1;}
     |
     ;
 
@@ -680,7 +688,8 @@ MapTest	   :   	t_map t_parentesis_izquierdo t_multiplicacion t_parentesis_derec
 ;
 
 
-ArrayTest	   :   	AnyArrayTest | TypedArrayTest	
+ArrayTest	   :   	AnyArrayTest        /*X*/ {$$=$1;}
+| TypedArrayTest	                    /*X*/ {$$=$1;}
 ;
 
 AnyArrayTest	   :   	t_array t_parentesis_izquierdo t_multiplicacion t_parentesis_derecho	
@@ -694,9 +703,9 @@ ParenthesizedItemType	   :   	t_parentesis_izquierdo ItemType t_parentesis_derec
 
 
 QName	   :
-   	PrefixedName
-    | UnprefixedName
-    | StringLiteral
+   	PrefixedName        /*X*/ {$$=$1;}
+    | UnprefixedName    /*X*/ {$$=$1;}
+    | StringLiteral     /*X*/ {$$=$1;}
     ;
 
 PrefixedName	   :   	Prefix t_dos_puntos LocalPart

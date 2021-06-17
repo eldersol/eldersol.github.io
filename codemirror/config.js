@@ -95,3 +95,16 @@ function reporteGramaticalXML() {
     tabla.innerHTML = getReporteGramaticalXMLASC();
 }
 
+function tablaSimboloXML() {
+    var tabla = document.getElementById("tabla_simbolo"); 
+    tabla.innerHTML = "";
+    tabla.innerHTML = getTablaSimboloXML();
+}
+
+function erroresXML() {
+    var errores = document.getElementById("errores"); 
+    errores.innerHTML = "";
+    errores.innerHTML = getReporteErrorXMLASC();
+}
+
+

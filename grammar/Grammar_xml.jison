@@ -86,7 +86,7 @@
 \n					{}
 <<EOF>>				    return 'EOF';
 .	{ 
-        addError(`Error léxico`,`No se esperaba ${yytext}`,yylloc.first_line, yylloc.first_column);
+        list_error.push(`Error léxico`,`No se esperaba ${yytext}`,yylloc.first_line, yylloc.first_column);         
 	}
 
 
@@ -98,6 +98,7 @@ INI : ESTRUCTURA EOF    {
         var root = new AST_XML($1);
         addProduccion('INI -> ESTRUCTURA EOF', 'INI.val = ESTRUCTURA.val'); 
         root.setProducciones(list_grammar);
+        root.setErrores(list_error);
         list_grammar = [];
         return root; 
     }
